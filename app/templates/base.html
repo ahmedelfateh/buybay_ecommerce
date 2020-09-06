@@ -1,3 +1,4 @@
+{% comment %} {% load cart_count_template_tag %} {% endcomment %}
 {% load static i18n %}
 <!DOCTYPE html>
 <html lang="en">
@@ -8,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Ecommerce app with Django!">
     <meta name="author" content="Ahmed Elfateh">
-    <link rel="icon" href="{% static 'img/favicons/favicon.ico' %}">
+    <link rel="icon" href="{% static 'img/favicons/logo.png' %}">
 
     {% block css %}
     
@@ -42,7 +43,7 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <!-- Just an image -->
             <a class="navbar-brand" href="{% url 'home' %}">
-              <img src="{% static 'img/favicons/favicon.ico' %}" width="30" height="30" alt="" loading="lazy">
+              <img src="{% static 'img/favicons/logo.png' %}" width="30" height="30" alt="" loading="lazy">
             </a>
           <!-- Brand -->
           <a class="navbar-brand waves-effect" href="/">
@@ -54,13 +55,7 @@
           <ul class="navbar-nav mr-auto">
 
             <li class="nav-item active">
-
-              <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
-
               <li class="nav-item"> <a class="nav-link waves-effect" href="/checkout">Checkout</a> </li>
-
-              <li class="nav-item"> <a class="nav-link waves-effect" href="/products">Products</a> </li>
-            
             </li>
 
           </ul>
@@ -68,28 +63,29 @@
         </div>
 
         <ul class="navbar-nav nav-flex-icons">
+          {% if request.user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link waves-effect">
-              <span class="badge red z-depth-1 mr-1"> 1 </span>
+              {% comment %} <span class="badge red z-depth-1 mr-1"> {{ request.user|cart_count }} </span> {% endcomment %}
               <i class="fas fa-shopping-cart"></i>
               <span class="clearfix d-none d-sm-inline-block"> Cart </span>
             </a>
           </li>
-          {% if request.user.is_authenticated %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> User Setting </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                   {# URL provided by django-allauth/account/urls.py #}
                   <a class="dropdown-item" href="{% url 'users:detail' request.user.username  %}">{% trans "My Profile" %}</a>
+
                   {# URL provided by django-allauth/account/urls.py #}
-                  <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans "Sign Out" %}</a>
+                  <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans "Logout" %}</a>
                 </div>
           </li>
           {% else %}
           {# URL provided by django-allauth/account/urls.py #}
-          <a id="sign-up-link" class="dropdown-item" href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a>
+          <li class="nav-item"> <a id="sign-up-link" class="nav-link waves-effect" href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a></li>
           {# URL provided by django-allauth/account/urls.py #}
-          <a id="log-in-link" class="dropdown-item" href="{% url 'account_login' %}">{% trans "Sign In" %}</a>
+          <li class="nav-item"> <a id="log-in-link" class="nav-link waves-effect" href="{% url 'account_login' %}">{% trans "Sign In" %}</a> </li>
           {% endif %}
         </ul>
 
@@ -132,11 +128,23 @@
       
       <script src="{% static 'js/project.js' %}"></script>
     
-    {% comment %} {% include "navbar.html" %} {% endcomment %}
+      <div class="mt-5 pt-4">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+          {% endfor %}
+        {% endif %}
+    </div>
 
     {% endblock javascript %}
     {% include "footer.html" %}
     {% include "scripts.html" %}
+
   </body>
 </html>
 

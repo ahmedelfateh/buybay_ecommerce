@@ -2,14 +2,13 @@ version: "3"
 
 volumes:
   local_postgres_data: {}
-  local_postgres_data_backups: {}
 
 services:
-  django:
+  app: &app
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-    image: app_local_django
+    image: app_local
     container_name: app
     depends_on:
       - postgres
@@ -26,10 +25,9 @@ services:
     build:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
-    image: app_production_postgres
+    image: postgres
     container_name: postgres
     volumes:
       - local_postgres_data:/var/lib/postgresql/data
-      - local_postgres_data_backups:/backups
     env_file:
       - ./.envs/.local/.postgres

@@ -1,10 +1,19 @@
-from django.shortcuts import render
-from .models import Item
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import ListView, DetailView
+from .models import Item, OrderItem, Order
+from django.utils import timezone
 
 # Create your views here.
-def item_list(request):
-    context = {"items": Item.objects.all()}
-    return render(request, "home.html", context=context)
+class ItemListView(ListView):
+    model = Item
+    paginate_by = 12
+    template_name = "home.html"
+
+
+class ItemDetailView(DetailView):
+    model = Item
+    template_name = "product.html"
 
 
 def checkout(request):
@@ -12,6 +21,46 @@ def checkout(request):
     return render(request, "checkout.html", context=context)
 
 
-def item_detail(request):
-    context = {"items": Item.objects.all()}
-    return render(request, "products.html", context=context)
+def add_item_cart(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    order_item, created = OrderItem.objects.get_or_create(
+        item=item, user=request.user, ordered=False
+    )
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        if order.items.filter(item__id=item.id).exists():
+            order_item.quantity += 1
+            order_item.save()
+            messages.info(request, "This Item has updated")
+        else:
+            messages.info(request, "This Item has added to your cart")
+            order.items.add()
+    else:
+        order_date = timezone.now()
+        order = Order.objects.create(user=request.user, ordered_date=order_date)
+        order.items.add(order_item)
+        messages.info(request, "This Item has added to your cart")
+
+    return redirect("orders:product", pk=pk)
+
+
+def remove_item_cart(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+
+        if order.items.filter(item__id=item.id).exists():
+            order_item = OrderItem.objects.filter(
+                item=item, user=request.user, ordered=False
+            )[0]
+            order.items.remove(order_item)
+            messages.info(request, "This item was removed from your cart.")
+            return redirect("orders:product", pk=pk)
+        else:
+            messages.info(request, "This item was not in your cart")
+            return redirect("orders:product", pk=pk)
+    else:
+        messages.info(request, "You do not have an active order")
+        return redirect("orders:product", pk=pk)
