@@ -1,6 +1,9 @@
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, View
 from .models import Item, OrderItem, Order
 from django.utils import timezone
 
@@ -21,6 +24,7 @@ def checkout(request):
     return render(request, "checkout.html", context=context)
 
 
+@login_required
 def add_item_cart(request, pk):
     item = get_object_or_404(Item, pk=pk)
     order_item, created = OrderItem.objects.get_or_create(
@@ -45,6 +49,7 @@ def add_item_cart(request, pk):
     return redirect("orders:product", pk=pk)
 
 
+@login_required
 def remove_item_cart(request, pk):
     item = get_object_or_404(Item, pk=pk)
     order_qs = Order.objects.filter(user=request.user, ordered=False)
@@ -64,3 +69,18 @@ def remove_item_cart(request, pk):
     else:
         messages.info(request, "You do not have an active order")
         return redirect("orders:product", pk=pk)
+
+
+class orderSummaryDetailView(LoginRequiredMixin, View):
+    def get(self, *args, **kwargs):
+        try:
+            order = Order.objects.get(user=self.request.user, ordered=False)
+            context = {"object": order}
+            return render(
+                self.request,
+                "order_summary.html",
+                context,
+            )
+        except ObjectDoesNotExist:
+            messages.error(self.request, "You do not have an active order")
+            return redirect("/")
