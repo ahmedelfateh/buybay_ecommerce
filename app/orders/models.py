@@ -70,7 +70,7 @@ class Order(models.Model):
     start_data = models.DateTimeField("Start Date", auto_now_add=True)
 
     def __str__(self):
-        return self.user.username
+        return self.user.name
 
     def get_total(self):
         total = 0
