@@ -37,16 +37,17 @@ def add_item_cart(request, pk):
             order_item.quantity += 1
             order_item.save()
             messages.info(request, "This Item has updated")
+            return redirect("orders:product", pk=pk)
         else:
+            order.items.add(order_item)
             messages.info(request, "This Item has added to your cart")
-            order.items.add()
+            return redirect("orders:product", pk=pk)
     else:
         order_date = timezone.now()
         order = Order.objects.create(user=request.user, ordered_date=order_date)
         order.items.add(order_item)
         messages.info(request, "This Item has added to your cart")
-
-    return redirect("orders:product", pk=pk)
+        return redirect("orders:product", pk=pk)
 
 
 @login_required
@@ -69,6 +70,28 @@ def remove_item_cart(request, pk):
     else:
         messages.info(request, "You do not have an active order")
         return redirect("orders:product", pk=pk)
+
+
+@login_required
+def remove_one_item_cart(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        if order.items.filter(item__id=item.id).exists():
+            order_item = OrderItem.objects.filter(
+                item=item, user=request.user, ordered=False
+            )[0]
+            if order_item.quantity > 1:
+                order_item.quantity -= 1
+                order_item.save()
+            else:
+                order.items.remove(order_item)
+            messages.info(request, "You just removed one item")
+            return redirect("orders:ordersummary")
+        else:
+            messages.info(request, "This item was not in your cart")
+            return redirect("orders:product", pk=pk)
 
 
 class orderSummaryDetailView(LoginRequiredMixin, View):

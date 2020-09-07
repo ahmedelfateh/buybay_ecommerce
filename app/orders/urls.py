@@ -6,6 +6,7 @@ from .views import (
     add_item_cart,
     remove_item_cart,
     orderSummaryDetailView,
+    remove_one_item_cart,
 )
 
 app_name = "orders"
@@ -16,5 +17,6 @@ urlpatterns = [
     path("ordersum/", orderSummaryDetailView.as_view(), name="ordersummary"),
     path("addcart/<pk>", add_item_cart, name="addcart"),
     path("removecart/<pk>", remove_item_cart, name="removecart"),
+    path("removeitem/<pk>", remove_one_item_cart, name="removeitem"),
     path("checkout/", checkout, name="checkout"),
 ]
