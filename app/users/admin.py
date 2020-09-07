@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
 from django.contrib.auth import forms as auth_forms
 from allauth.account.models import EmailAddress
-from .models import User
+from .models import User, BillingAddress
 
 
 class UserChangeForm(auth_forms.UserChangeForm):
@@ -25,6 +25,13 @@ class EmailsInline(admin.TabularInline):
 
 
 admin.site.unregister(EmailAddress)
+
+
+class BillingAddressInline(admin.TabularInline):
+    model = BillingAddress
+    readonly_fields = ["country", "street_address", "apartment_address", "zip"]
+    max_num = 1
+    extra = 0
 
 
 @admin.register(User)
@@ -80,4 +87,12 @@ class UserAdmin(auth_admin.UserAdmin):
     search_fields = ("first_name", "last_name", "email")
     ordering = ("email",)
     list_display_links = ("get_full_name", "email")
-    inlines = [EmailsInline]
+    inlines = [EmailsInline, BillingAddressInline]
+
+
+class BillingAddressAdmin(admin.ModelAdmin):
+    readonly_fields = ["user", "country", "street_address", "apartment_address", "zip"]
+    search_fields = ("user",)
+
+
+admin.site.register(BillingAddress, BillingAddressAdmin)
