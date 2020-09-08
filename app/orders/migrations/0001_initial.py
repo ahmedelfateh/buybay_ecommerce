@@ -15,30 +15,66 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Item',
+            name="Item",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=100)),
-                ('price', models.FloatField()),
-                ('amount', models.IntegerField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=100)),
+                ("price", models.FloatField()),
+                ("amount", models.IntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='OrderItem',
+            name="OrderItem",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='orders.Item')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="orders.Item"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Order',
+            name="Order",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ordered_date', models.DateTimeField()),
-                ('ordered', models.BooleanField(default=False)),
-                ('start_data', models.DateTimeField(auto_now_add=True)),
-                ('items', models.ManyToManyField(to='orders.OrderItem')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='items', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("ordered_date", models.DateField()),
+                ("ordered", models.BooleanField(default=False)),
+                ("start_data", models.DateField(auto_now_add=True)),
+                ("items", models.ManyToManyField(to="orders.OrderItem")),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="items",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

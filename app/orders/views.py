@@ -6,8 +6,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, DetailView, View
 from django.utils import timezone
 
-from .forms import CheckoutForm
-from .models import Item, OrderItem, Order
+from .forms import CheckoutForm, PromoCodeForm
+from .models import Item, OrderItem, Order, PromoCode
 from app.users.models import BillingAddress
 
 # Create your views here.
@@ -114,9 +114,19 @@ class orderSummaryDetailView(LoginRequiredMixin, View):
 
 class CheckoutView(View):
     def get(self, *args, **kwargs):
-        form = CheckoutForm()
-        context = {"form": form}
-        return render(self.request, "checkout.html", context)
+
+        try:
+            order = Order.objects.get(user=self.request.user, ordered=False)
+            form = CheckoutForm()
+            context = {
+                "form": form,
+                "order": order,
+                "promocodeform": PromoCodeForm(),
+            }
+            return render(self.request, "checkout.html", context)
+        except ObjectDoesNotExist:
+            messages.info(self.request, "You do not have an active order")
+            return redirect("orders:checkout")
 
     def post(self, *args, **kwargs):
         form = CheckoutForm(self.request.POST or None)
@@ -156,3 +166,31 @@ class CheckoutView(View):
         except ObjectDoesNotExist:
             messages.error(self.request, "You do not have an active order")
             return redirect("orders:ordersummary")
+
+
+def check_promocode(request, code):
+    try:
+        promocode = PromoCode.objects.get(code=code)
+        if promocode.is_expired:
+            messages.info(request, "This promo code is expired")
+        else:
+            return promocode
+    except ObjectDoesNotExist:
+        messages.info(request, "This promo code does not exist")
+
+
+class PromoCodeView(View):
+    def post(self, *args, **kwargs):
+        form = PromoCodeForm(self.request.POST or None)
+        if form.is_valid():
+            code = form.cleaned_data.get("code")  # promocode
+            order = Order.objects.get(user=self.request.user, ordered=False)  # order
+            check_code = check_promocode(self.request, code)
+            if str(check_code) == str(code):
+                # payment.promocode = check_code
+                # payment.save()
+                messages.success(self.request, "Successfully added coupon")
+                return redirect("orders:checkout")
+            else:
+                messages.info(self.request, check_code)
+                return redirect("orders:ordersummary")

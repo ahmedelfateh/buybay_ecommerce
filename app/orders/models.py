@@ -1,5 +1,6 @@
 from django.db import models
 from django.shortcuts import reverse
+import datetime
 
 # Create your models here.
 
@@ -65,9 +66,9 @@ class Order(models.Model):
         "users.User", on_delete=models.PROTECT, related_name="items"
     )
     items = models.ManyToManyField(OrderItem)
-    ordered_date = models.DateTimeField("Ordered Date")
+    ordered_date = models.DateField("Ordered Date")
     ordered = models.BooleanField("Ordered", default=False)
-    start_data = models.DateTimeField("Start Date", auto_now_add=True)
+    start_data = models.DateField("Start Date", auto_now_add=True)
 
     def __str__(self):
         return self.user.name
@@ -77,3 +78,16 @@ class Order(models.Model):
         for order_item in self.items.all():
             total += order_item.get_total_item_price()
         return total
+
+
+class PromoCode(models.Model):
+    code = models.CharField("code", max_length=15)
+    amount = models.FloatField("Amount")
+    expiry_date = models.DateField("Expiry Date", blank=False)
+
+    def __str__(self):
+        return self.code
+
+    @property
+    def is_expired(self):
+        return self.expiry_date < datetime.date.today()
