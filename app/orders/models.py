@@ -1,9 +1,20 @@
+import datetime
+from os import path
 from django.db import models
 from django.shortcuts import reverse
-import datetime
 from app.users.models import BillingAddress
+from django.utils import timezone
+
 
 # Create your models here.
+
+
+def get_file_path(prefix: str, filename: str):
+    if not prefix.endswith("/"):
+        prefix += "/"
+    timestamp = timezone.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
+    ext = path.splitext(filename)[1]
+    return prefix + timestamp + ext
 
 
 class Item(models.Model):
@@ -16,6 +27,9 @@ class Item(models.Model):
         PRIMARY = "PR", "primary"
         SECONDARY = "SE", "secondary"
         DANGER = "DA", "danger"
+
+    def product_image_path(self, filename):  # pylint: disable=no-self-use
+        return get_file_path("product_image/", filename)
 
     title = models.CharField("Title", max_length=100)
     price = models.FloatField("Price")
@@ -33,6 +47,13 @@ class Item(models.Model):
     )
     description = models.CharField("Description", max_length=300, blank=True, null=True)
     amount = models.IntegerField("Amount")
+    image = models.ImageField(
+        "Product Image",
+        max_length=256,
+        upload_to=product_image_path,
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return self.title
@@ -62,7 +83,16 @@ class OrderItem(models.Model):
         return self.quantity * self.item.price
 
 
+class OrderStates(models.TextChoices):  # A subclass of Enum
+    INITIATED = "IN", "initiated"
+    DELIVERED = "DE", "delivered"
+    RECEIVED = "RE", "received"
+    REFUNDREQUEST = "RR", "Refund Request"
+    REFUNDGRANTED = "RG", "Refund Granted"
+
+
 class Order(models.Model):
+
     user = models.ForeignKey(
         "users.User", on_delete=models.PROTECT, related_name="items"
     )
@@ -78,6 +108,13 @@ class Order(models.Model):
     )
     billing_address = models.ForeignKey(
         "users.BillingAddress", on_delete=models.SET_NULL, blank=True, null=True
+    )
+    refund_code = models.CharField("Refund Code", max_length=20, blank=True, null=True)
+    state = models.CharField(
+        "Order State",
+        max_length=2,
+        choices=OrderStates.choices,
+        default=OrderStates.INITIATED,
     )
 
     def __str__(self):
@@ -120,3 +157,13 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.user.username}, {self.stripe_charge_id}"
+
+
+class Refund(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    reason = models.TextField()
+    accepted = models.BooleanField(default=False)
+    email = models.EmailField()
+
+    def __str__(self):
+        return f"{self.reason}"

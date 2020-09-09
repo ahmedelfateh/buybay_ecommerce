@@ -9,6 +9,7 @@ from .views import (
     CheckoutView,
     PromoCodeView,
     PaymentView,
+    RequestRefundView,
 )
 
 app_name = "orders"
@@ -20,6 +21,7 @@ urlpatterns = [
     path("checkout/", CheckoutView.as_view(), name="checkout"),
     path("promo/", PromoCodeView.as_view(), name="promo"),
     path("payment/<option>/", PaymentView.as_view(), name="PaymentView"),
+    path("refund/", RequestRefundView.as_view(), name="refund"),
     path("addcart/<pk>/", add_item_cart, name="addcart"),
     path("removecart/<pk>/", remove_item_cart, name="removecart"),
     path("removeitem/<pk>/", remove_one_item_cart, name="removeitem"),

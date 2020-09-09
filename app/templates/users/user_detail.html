@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
+
 {% block title %}{{ object.name }}{% endblock %}
 
 {% block content %}
@@ -8,7 +9,7 @@
 
   <div class="row">
     <div class="col-sm-12">
-
+    <br>
       <h2>{{ object.name }}</h2>
       {% if object.email %}
         <p>{{ object.email }}</p>
@@ -25,10 +26,18 @@
     <a class="btn btn-primary" href="{% url 'account_email' %}" role="button">Email</a>
     <a class="btn btn-primary" href="{% url "account_reset_password" %}" role="button">Reset Password</a>
     <a class="btn btn-primary" href="{% url "account_change_password" %}" role="button">Change Password</a>
-    {% comment %} <a class="btn btn-primary" href="{% url "account_confirm_email" %}/request.user.id" role="button">Send Confirmation Email</a> {% endcomment %}
+    <a class="btn btn-primary" href="{% url 'account_logout'%}" role="button">Signout</a>
+    <!-- Your Stuff: Custom user template urls -->
+  </div>
 
-    
+</div>
 
+<br>
+<hr>
+
+<div class="row">
+
+  <div class="col-sm-12">
     <!-- Your Stuff: Custom user template urls -->
   </div>
 

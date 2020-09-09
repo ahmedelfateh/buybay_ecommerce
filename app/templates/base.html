@@ -72,16 +72,16 @@
               <span class="clearfix d-none d-sm-inline-block"> Cart </span>
             </a>
           </li>
-          <li class="nav-item dropdown">
+          {% comment %} <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Setting </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                   {# URL provided by django-allauth/account/urls.py #}
                   <a class="dropdown-item" href="{% url 'users:detail' request.user.id  %}">{% trans "Profile" %}</a>
-
                   {# URL provided by django-allauth/account/urls.py #}
                   <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans "Logout" %}</a>
                 </div>
-          </li>
+          </li> {% endcomment %}
+          <li class="nav-item"> <a id="sign-up-link" class="nav-link waves-effect" href="{% url 'users:detail' request.user.id  %}">{% trans "Profile" %}</a></li>
           {% else %}
           {# URL provided by django-allauth/account/urls.py #}
           <li class="nav-item"> <a id="sign-up-link" class="nav-link waves-effect" href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a></li>
