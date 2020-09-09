@@ -1,6 +1,7 @@
 from django.db import models
 from django.shortcuts import reverse
 import datetime
+from app.users.models import BillingAddress
 
 # Create your models here.
 
@@ -69,6 +70,15 @@ class Order(models.Model):
     ordered_date = models.DateField("Ordered Date")
     ordered = models.BooleanField("Ordered", default=False)
     start_data = models.DateField("Start Date", auto_now_add=True)
+    payment = models.ForeignKey(
+        "Payment", on_delete=models.SET_NULL, blank=True, null=True
+    )
+    promo_code = models.ForeignKey(
+        "PromoCode", on_delete=models.SET_NULL, blank=True, null=True
+    )
+    billing_address = models.ForeignKey(
+        "users.BillingAddress", on_delete=models.SET_NULL, blank=True, null=True
+    )
 
     def __str__(self):
         return self.user.name
@@ -77,6 +87,13 @@ class Order(models.Model):
         total = 0
         for order_item in self.items.all():
             total += order_item.get_total_item_price()
+        return total
+
+    def get_total_promocode(self):
+        total = 0
+        for order_item in self.items.all():
+            total += order_item.get_total_item_price()
+        total -= self.promo_code.amount
         return total
 
 
@@ -91,3 +108,15 @@ class PromoCode(models.Model):
     @property
     def is_expired(self):
         return self.expiry_date < datetime.date.today()
+
+
+class Payment(models.Model):
+    stripe_charge_id = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        "users.User", on_delete=models.SET_NULL, blank=True, null=True
+    )
+    amount = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}, {self.stripe_charge_id}"

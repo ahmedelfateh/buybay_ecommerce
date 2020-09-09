@@ -270,3 +270,4 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+STRIPE_SECRET_KEY = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
