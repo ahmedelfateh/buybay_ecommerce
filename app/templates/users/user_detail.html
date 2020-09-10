@@ -38,7 +38,30 @@
 <div class="row">
 
   <div class="col-sm-12">
-    <!-- Your Stuff: Custom user template urls -->
+    {% if object.billingaddress_set.all %}
+    <h3> Your Address </h3>
+    {% for address in  object.billingaddress_set.all %}
+    <p> {{address}} </p>
+    {% endfor %}
+    <hr>
+    {% endif %}
+
+    {% if object.items.all %}
+    <h3> Your Orders </h3>
+    {% for order in  object.orders.all %}
+    <p> {{order.items}} | {{order.ordered_date}} | {{order.ordered}} | {{order.ordered_date}} | {{order.refund_code}} </p>
+    {% endfor %}
+    <hr>
+    {% endif %}
+
+    {% if object.items.all %}
+    <h3> Your Payments object.items.all </h3>
+    {% for order in  object.items.all %}
+    <p> {{order.payment}} </p>
+    {% endfor %}
+    <hr>
+    {% endif %}
+
   </div>
 
 </div>

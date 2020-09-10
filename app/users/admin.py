@@ -3,6 +3,7 @@ from django.contrib.auth import admin as auth_admin
 from django.contrib.auth import forms as auth_forms
 from allauth.account.models import EmailAddress
 from .models import User, BillingAddress
+from app.utils.custom_admin_perm import CustomAccessAdmin
 
 
 class UserChangeForm(auth_forms.UserChangeForm):
@@ -35,7 +36,8 @@ class BillingAddressInline(admin.TabularInline):
 
 
 @admin.register(User)
-class UserAdmin(auth_admin.UserAdmin):
+# class UserAdmin(auth_admin.UserAdmin):
+class UserAdmin(CustomAccessAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
     fieldsets = (
@@ -88,6 +90,12 @@ class UserAdmin(auth_admin.UserAdmin):
     ordering = ("email",)
     list_display_links = ("get_full_name", "email")
     inlines = [EmailsInline, BillingAddressInline]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(id=request.user.id)
 
 
 class BillingAddressAdmin(admin.ModelAdmin):
