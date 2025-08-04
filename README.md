@@ -2,12 +2,6 @@
 
 <p style="font-family:courier;color:blue;font-size:130%;"><b> E-commerce app with Django for Fun! </b></p>
 
-
-<p align="center">
-<a href="">
-<img alt="BuyBay " src="https://i.imgur.com/JaI1BKk.png%0A%20:target:%20https://github.com/pydanny/cookiecutter-django/%0A%20:alt:%20BuyBay">
-</a>
-
 <p align="center">
 <a href="https://github.com/pydanny/cookiecutter-django/">
 <img alt="Cookiecutter Django " src="https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg">
